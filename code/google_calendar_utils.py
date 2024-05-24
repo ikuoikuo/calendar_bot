@@ -13,7 +13,7 @@ TOKEN_PATH = '../token.json'
 # 認証範囲
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
-def main():
+def get_schedule():
     creds = None
     if os.path.exists(TOKEN_PATH):
         creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
@@ -28,23 +28,42 @@ def main():
 
     service = build('calendar', 'v3', credentials=creds)
     JST = pytz.timezone('Asia/Tokyo')
-    # 今から1週間後までに期間を設定
+    # プログラム実行時間から1週間後までに期間を設定
     now = datetime.datetime.now(JST)
     start_time = now.isoformat()
     end_time = (now + datetime.timedelta(days=7)).isoformat() 
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z'はUTC時間
-    events_result = service.events().list(calendarId='primary', timeMin=start_time,timeMax=end_time,
+    events_result = service.events().list(calendarId='primary', timeMin=start_time, timeMax=end_time,
                                           maxResults=50, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
-
     if not events:
         return None
+    
+    schedule = []
     for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
-    return events
+        event_info = {
+            'summary': event.get('summary'),
+            'start': event['start'].get('dateTime', event['start'].get('date')),
+            'attendees': event.get('attendees', [])
+        }
+        schedule.append(event_info)
+    return schedule
+
+def count_workout_events(schedule):
+    workout_count = {}
+    for event in schedule:
+        if 'ジム' in event['summary']:
+            for attendee in event['attendees']:
+                email = attendee.get('email')
+                if email:
+                    if email in workout_count:
+                        workout_count[email] += 1
+                    else:
+                        workout_count[email] = 1
+    return workout_count
 
 if __name__ == '__main__':
-    main()
+    schedule = get_schedule()
+    count = count_workout_events(schedule)
+    print(count)
