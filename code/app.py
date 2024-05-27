@@ -68,14 +68,11 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if event.message.text == 'グー':
-        reply_message = 'パー'
-    elif event.message.text == 'チョキ':
-        reply_message = 'グー'
-    elif event.message.text == 'パー':
-        reply_message = 'チョキ'
+    user_ids = load_group_ids('../data/group_id.csv')
+    if event.message.text == '@ジョージ' and event.source.group_id == user_ids[1]:
+        reply_message = "返信厳しいって"
     else:
-        reply_message = 'ごめんね。\nまだ他のメッセージには対応してないよ'
+        reply_message = None
 
     line_bot_api.reply_message(
         event.reply_token,
