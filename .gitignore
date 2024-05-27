@@ -2,3 +2,5 @@
 token.json
 credentials.json
 data/group_id.csv
+data/group_members.json
+code/__pycache__

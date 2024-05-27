@@ -9,7 +9,6 @@ import csv
 
 app = Flask(__name__)
 
-# 環境変数をロード
 load_dotenv()
 CHANNEL_SECRET = os.getenv('CHANNEL_SECRET')
 CHANNEL_ACCESS_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')
@@ -54,14 +53,10 @@ def send_message():
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
-
-    # get request body as text
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
 
-    # handle webhook body
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
@@ -73,7 +68,6 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    # 相手の送信した内容で条件分岐して回答を変数に代入
     if event.message.text == 'グー':
         reply_message = 'パー'
     elif event.message.text == 'チョキ':
@@ -83,12 +77,10 @@ def handle_message(event):
     else:
         reply_message = 'ごめんね。\nまだ他のメッセージには対応してないよ'
 
-    # メッセージを返信
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_message)
     )
-
 
 @handler.add(JoinEvent)
 def handle_join(event):
