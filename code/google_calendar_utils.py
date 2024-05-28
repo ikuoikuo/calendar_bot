@@ -1,30 +1,19 @@
-import os.path
 import datetime
 import pytz
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from google.auth import load_credentials_from_file
 
 # 認証情報ファイルのパス
-CREDENTIALS_PATH = '../credentials.json'
+CREDENTIALS_PATH = '../credentials_service.json'
 TOKEN_PATH = '../token.json'
 
 # 認証範囲
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 def get_schedule():
-    creds = None
-    if os.path.exists(TOKEN_PATH):
-        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-            creds = flow.run_local_server(port=64619)
-        with open(TOKEN_PATH, 'w') as token:
-            token.write(creds.to_json())
+    creds = load_credentials_from_file(
+      CREDENTIALS_PATH, SCOPES
+    )[0]
 
     service = build('calendar', 'v3', credentials=creds)
     JST = pytz.timezone('Asia/Tokyo')
@@ -33,7 +22,7 @@ def get_schedule():
     start_time = now.isoformat()
     end_time = (now + datetime.timedelta(days=7)).isoformat() 
 
-    events_result = service.events().list(calendarId='primary', timeMin=start_time, timeMax=end_time,
+    events_result = service.events().list(calendarId='i.fujikawa0701@gmail.com', timeMin=start_time, timeMax=end_time,
                                           maxResults=50, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
