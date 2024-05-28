@@ -10,7 +10,7 @@ TOKEN_PATH = '../token.json'
 # 認証範囲
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
-def get_schedule():
+def get_schedule(calendar_id):
     creds = load_credentials_from_file(
       CREDENTIALS_PATH, SCOPES
     )[0]
@@ -21,8 +21,7 @@ def get_schedule():
     now = datetime.datetime.now(JST)
     start_time = now.isoformat()
     end_time = (now + datetime.timedelta(days=7)).isoformat() 
-
-    events_result = service.events().list(calendarId='i.fujikawa0701@gmail.com', timeMin=start_time, timeMax=end_time,
+    events_result = service.events().list(calendarId=calendar_id, timeMin=start_time, timeMax=end_time,
                                           maxResults=50, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
@@ -45,7 +44,8 @@ def count_workout_events(schedule):
         if 'ジム' in event['summary']:
             for attendee in event['attendees']:
                 email = attendee.get('email')
-                if email:
+                response_status = attendee.get('responseStatus')
+                if email and response_status == 'accepted':
                     if email in workout_count:
                         workout_count[email] += 1
                     else:
