@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import requests
 import os
 import csv
+from main import main
 
 app = Flask(__name__)
 
@@ -70,14 +71,7 @@ def callback():
 def handle_message(event):
     user_ids = load_group_ids('../data/group_id.csv')
     if event.message.text == '@ジョージ' and event.source.group_id == user_ids[1]:
-        reply_message = "返信厳しいって"
-    else:
-        reply_message = None
-
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply_message)
-    )
+        main()
 
 @handler.add(JoinEvent)
 def handle_join(event):
