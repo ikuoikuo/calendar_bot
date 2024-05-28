@@ -1,6 +1,7 @@
 .env
 token.json
 credentials.json
+credentials_service.json
 data/group_id.csv
 data/group_members.json
 code/__pycache__
