@@ -45,7 +45,8 @@ def count_workout_events(schedule):
         if 'ジム' in event['summary']:
             for attendee in event['attendees']:
                 email = attendee.get('email')
-                if email:
+                response_status = attendee.get('responseStatus')
+                if email and response_status == 'accepted':
                     if email in workout_count:
                         workout_count[email] += 1
                     else:
